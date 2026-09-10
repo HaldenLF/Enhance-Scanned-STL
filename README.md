@@ -4,9 +4,13 @@ This project prepares rough or low-quality scanned STL and OBJ files for 3D prin
 
 ## Overview
 
-The script in `enchance_scanned_stl.py` scans a source folder recursively, finds STL and OBJ files, and sends each file through a MeshLab filter script. The processed meshes are written to a separate output directory while preserving the original folder layout and filenames.
+The workflow uses a main controller script and a worker script:
 
-It is designed for noisy or imperfect scanned meshes that need cleaning before they are ready for printing.
+- `enhanced.py` launches the batch process
+- `worker.py` processes one mesh at a time inside a separate subprocess
+- `sharpen_pipeline_clean.mlx` contains the verified MeshLab filter sequence
+
+This setup is designed for large batches of scanned meshes but can be used for smaller batches. Time to completion depends on the size of the orignial file. It walks the input folder tree, preserves the original folder layout, and writes processed copies into a separate output directory.
 
 ## What the script does
 
@@ -29,13 +33,14 @@ The applied filter sequence is:
 4. Taubin smoothing repeated 7 times
 5. unsharp mask geometry repeated 5 times
 
-This combination is intended to remove scan noise, fix mesh defects, and sharpen detail for better printability.
+This is intended to remove scan noise, fix mesh defects, and sharpen detail for better quality prints.
 
 ## Files in this project
 
-- `enchance_scanned_stl.py` — batch processing script
-- `sharpen_pipeline_clean.mlx` — verified MeshLab filter script
-- Test different 
+- `enhanced.py` — main batch controller
+- `worker.py` — single-file processing worker
+- `sharpen_pipeline_clean.mlx` — MeshLab filter script
+- `meshlab_log.txt` — logfile for worker subprocess output
 
 ## Requirements
 
@@ -53,6 +58,8 @@ Edit the path values near the top of the script:
 input_folder = r"\Low Quality"
 output_folder = r"\Sharpened"
 script_path = r"\sharpen_pipeline_clean.mlx"
+worker_script = r"\worker.py"
+log_path = r"\meshlab_log.txt"
 ```
 
 You can also adjust how many files are processed at once:
@@ -66,7 +73,7 @@ MAX_WORKERS = 3
 Run the script from the project folder:
 
 ```bash
-python "enchance_scanned_stl.py"
+python "enchanced_stl.py"
 ```
 
 The script will:
@@ -104,6 +111,7 @@ after cleanup, repair, resampling, smoothing, and sharpening.
 - Test a small batch before processing a full collection.
 - Check the result mesh before sending it to the printer.
 - Some models may fail depending on topology, defects, or bad triangulation.
+- - Since the worker output is redirected to `meshlab_log.txt`, the main terminal stays cleaner while failures can still be investigated.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for the full terms.
