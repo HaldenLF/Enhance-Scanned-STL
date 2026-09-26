@@ -4,8 +4,9 @@ Batch-repair-and-sharpen STL/OBJ files across nested folders.
 Walks input_folder recursively and, for every .stl/.obj file found,
 launches mesh_worker.py as a SEPARATE subprocess to run the verified
 MeshLab filter script (cleanup -> manifold repair -> uniform
-resampling -> Taubin smoothing -> Unsharp Mask sharpening). Results
-go to output_folder, mirroring the same folder structure and
+resampling -> Taubin smoothing -> Unsharp Mask sharpening). 
+Then it reduces the number of triangles in the mesh using decimation.
+Results go to output_folder, mirroring the same folder structure and
 filenames.
 
 Each subprocess's console output is redirected straight to a log
@@ -32,6 +33,7 @@ log_path = r"\meshlab_log.txt"
 worker_script = r"\worker.py"
 
 valid_extensions = (".stl", ".obj")
+# Change this to the number of cores you wish to assign to the task.
 MAX_WORKERS = 3
 # ---------------------------
 
@@ -78,6 +80,7 @@ def main():
         return
 
     print(f"Found {len(tasks)} file(s). Processing with {MAX_WORKERS} worker(s).")
+    print(f"All files saved as STL Binary format.")
     print(f"Subprocess output is being logged to: {log_path}\n")
 
     processed, failed = 0, []
