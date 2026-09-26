@@ -12,6 +12,8 @@ import pymeshlab
 
 def main():
     input_path, output_path, script_path = sys.argv[1], sys.argv[2], sys.argv[3]
+    # saving all files in same format
+    output_path = os.path.splitext(output_path)[0] + ".stl"
     ms = pymeshlab.MeshSet()
     ms.load_new_mesh(input_path)
     ms.load_filter_script(script_path)
